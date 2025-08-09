@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "api/send-poster.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
+
+
