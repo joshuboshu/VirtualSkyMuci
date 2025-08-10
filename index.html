@@ -417,11 +417,15 @@
         let constOn = false; // Por defecto desactivado
         // Configuración del envío por correo (rellenar si se tiene backend disponible)
         // EmailJS config (rellenar con tus datos de EmailJS)
+        /*
         const EMAILJS_PUBLIC_KEY = 'enhZoBle3y8YrdMsa'; // Obtén esto en https://dashboard.emailjs.com/admin/account
         const EMAILJS_SERVICE_ID = 'service_b1p0wyq'; // Ejemplo: 'service_xxxxx'
         const EMAILJS_TEMPLATE_ID = 'template_b1qz1et'; // Ejemplo: 'template_xxxxx'
         // Opcional: endpoint serverless si prefieres enviar desde backend en vez de EmailJS
         const SEND_EMAIL_ENDPOINT = '';
+        */
+        const ELASTICEMAIL_FROM = 'joshua.lomcol92@gmail.com'
+        const ELASTICEMAIL_API_KEY = 'BA1FE7D949D266A8DF30208C588074F55CB104678D5F099134AD39E993947FEA8A229DBF6032D692AAF3BB63B9297A8B';
         const COPYRIGHT_NAME = 'Joshua Colman Lombardo';
         const MUCI_EMAIL = 'contacto@muci.org';
         // Configuración de Supabase
@@ -665,49 +669,46 @@
                     return;
                 }
 
-                // Enviar con EmailJS el enlace público
-                if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
-                    try{
-                        const params = {
-                            title: 'Tu mapa estelar — MuCi',
-                            subject: 'Tu mapa estelar — MuCi',
-                            message: `Generado por MuCi • Autor: ${COPYRIGHT_NAME}\n\nDescarga tu imagen aquí: ${publicUrl}`,
-                            to_email: to,
-                            image_url: publicUrl // Usa {{image_url}} en tu plantilla EmailJS
-                        };
-                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY);
-                        showToast('¡Correo enviado correctamente! 🎉', true);
-                        btnSendText.textContent = '¡Enviado!';
-                        setTimeout(() => {
-                            btnSendText.textContent = 'Enviar por correo';
-                        }, 2000);
-                        btnSendSpinner.classList.add('hidden');
-                        btnSend.disabled = false;
-                        return;
-                    }catch(e){
-                        console.warn('EmailJS fallo, probando endpoint/mailing local', e);
-                    }
+                // Enviar con Elastic Email
+                try {
+                    const subject = 'Tu mapa estelar — MuCi';
+                    const htmlBody = `
+                        <div style="font-family:Poppins,sans-serif;color:#222">
+                            <h2>¡Aquí tienes tu mapa estelar personalizado!</h2>
+                            <p>Generado por MuCi • Autor: ${COPYRIGHT_NAME}</p>
+                            <p>Puedes descargar tu imagen aquí:</p>
+                            <p><a href="${publicUrl}" style="color:#F17DB1;font-weight:bold;">Descargar imagen del cielo</a></p>
+                            <img src="${publicUrl}" alt="Mapa estelar" style="max-width:100%;border-radius:16px;margin-top:16px;">
+                            <p style="margin-top:24px;font-size:13px;color:#888">Si tienes problemas para ver la imagen, copia y pega este enlace en tu navegador: <br>${publicUrl}</p>
+                        </div>
+                    `;
+                    const form = new FormData();
+                    form.append('apikey', ELASTICEMAIL_API_KEY);
+                    form.append('from', ELASTICEMAIL_FROM);
+                    form.append('to', to);
+                    form.append('subject', subject);
+                    form.append('bodyHtml', htmlBody);
+
+                    await fetch('https://api.elasticemail.com/v2/email/send', {
+                        method: 'POST',
+                        body: form
+                    }).then(async res => {
+                        const data = await res.json();
+                        if (!data.success) throw new Error(data.error || 'Error enviando correo');
+                    });
+
+                    showToast('¡Correo enviado correctamente! 🎉', true);
+                    btnSendText.textContent = '¡Enviado!';
+                    setTimeout(() => {
+                        btnSendText.textContent = 'Enviar por correo';
+                    }, 2000);
+                    btnSendSpinner.classList.add('hidden');
+                    btnSend.disabled = false;
+                    return;
+                } catch (err) {
+                    showToast('No se pudo enviar el correo con Elastic Email.', false);
                 }
-                if (SEND_EMAIL_ENDPOINT) {
-                    try {
-                        await fetch(SEND_EMAIL_ENDPOINT, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                to,
-                                subject: 'Tu mapa estelar — MuCi',
-                                message: `Generado por MuCi • Autor: ${COPYRIGHT_NAME}`,
-                                filename: 'mapa-estelar.png',
-                                imageBase64: (dataUrl||'').split(',')[1]
-                            })
-                        });
-                        showToast('Imagen enviada al correo especificado.', true);
-                    } catch (err) {
-                        showToast('No se pudo enviar por correo desde el navegador.', false);
-                    }
-                } else {
-                    showToast('No se pudo enviar el correo automáticamente. Verifica tu configuración de EmailJS.', false);
-                }
+
                 btnSend.disabled = false;
                 btnSendText.textContent = 'Enviar por correo';
                 btnSendSpinner.classList.add('hidden');
