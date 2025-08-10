@@ -208,6 +208,12 @@
             header h1 { font-size: 1.5rem !important; padding-left: 4rem !important; padding-right: 4rem !important; }
         }
     </style>
+    <!-- Agrega esto en el <head> o antes de tu script principal -->
+    <!-- Importa el módulo del SDK de Supabase para subida -->
+    <script type="module">
+    import { uploadImageFromDataUrl } from './supabase-upload.js';
+    window.uploadImageFromDataUrl = uploadImageFromDataUrl;
+    </script>
 </head>
 
 <body>
@@ -310,11 +316,6 @@
                     </div>
                 </div>
                 
-                <!-- <button id="btn-now" class="btn-minimal px-4 py-3 rounded-xl text-sm font-semibold w-full sm:w-auto flex items-center justify-center gap-2" style="color: #000000;">
-                    <i data-lucide="clock-3" class="w-4 h-4"></i>
-                    <span>Ahora</span>
-                </button> -->
-                
                 <button id="btn-names" class="btn-minimal px-4 py-3 rounded-xl text-sm font-semibold w-full sm:w-auto flex items-center justify-center gap-2" style="color: #000000;">
                     <i data-lucide="tag" class="w-4 h-4"></i>
                     <span>Nombres</span>
@@ -339,27 +340,40 @@
                     <h3 class="text-2xl font-bold mb-6 text-center" style="color: #000000;">
                         Crear póster personalizado
                     </h3>
+                    <!-- NUEVO INPUT para frase personalizada antes del correo -->
+                    <div class="mb-4">
+                        <input id="poster-msg" 
+                            type="text" 
+                            maxlength="80"
+                            placeholder="Agrega una frase especial (opcional)"
+                            class="input-minimal w-full px-4 py-3 rounded-xl text-base font-medium focus:outline-none"
+                            style="color: #000000;"
+                        />
+                        <p class="text-xs mt-1" style="color:#6950A1;">
+                            Si no escribes nada, se usará: "Nuestro primer beso bajo este mágico cielo nocturno"
+                        </p>
+                    </div>
                     
-                    <button id="btn-poster" 
-                            class="btn-minimal w-full mt-4 px-5 py-3 sm:px-6 sm:py-4 rounded-xl text-sm font-semibold transition-all-smooth"
-                            style="color: #000000;">
-                        <div class="flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-5 h-5"></i>
-                            <span>Descargar póster</span>
+                    <!-- Modal flotante para previsualización -->
+                    <div id="poster-modal" class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center hidden">
+                        <div class="bg-white rounded-2xl shadow-2xl p-4 max-w-full" style="max-width:440px;">
+                            <div class="flex justify-end">
+                                <button id="close-poster-modal" class="text-gray-400 hover:text-pink-500 text-2xl font-bold">&times;</button>
+                            </div>
+                            <img id="poster-preview-img" class="rounded-xl border border-pink-200 shadow-lg max-w-full" style="max-width:420px;max-height:600px;" alt="Previsualización del póster"/>
                         </div>
-                    </button>
-
+                    </div>
+                    
                     <div class="mt-6 grid gap-3">
                         <div class="relative">
                             <i data-lucide="mail" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style="color:#F17DB1;"></i>
                             <input id="email-to" type="email" placeholder="correo@ejemplo.com" class="input-minimal w-full pl-9 pr-3 py-3 rounded-xl text-sm focus:outline-none" style="color:#000000;" />
                         </div>
                         <p class="text-xs" style="color:#6950A1;">Agrega tu correo si quieres enviar esta imagen del cielo de tu fecha especial.</p>
-                        <button id="btn-send-email" class="btn-minimal w-full px-5 py-3 rounded-xl text-sm font-semibold transition-all-smooth disabled:opacity-50 disabled:cursor-not-allowed" style="color:#000000;" disabled>
-                            <div class="flex items-center justify-center gap-2">
-                                <i data-lucide="send" class="w-5 h-5"></i>
-                                <span>Enviar por correo</span>
-                            </div>
+                        <!-- Sustituye el botón de enviar correo por uno con spinner y texto dinámico -->
+                        <button id="btn-send-email" class="btn-minimal w-full px-5 py-3 rounded-xl text-sm font-semibold transition-all-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" style="color:#000000;" disabled>
+                            <span id="btn-send-email-text">Enviar por correo</span>
+                            <span id="btn-send-email-spinner" class="hidden"><i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i></span>
                         </button>
                     </div>
                 </div>
@@ -376,10 +390,15 @@
         </div>
     </div>
 
+    <!-- Toast para alertas bonitas -->
+    <div id="toast-email" class="fixed left-1/2 bottom-8 z-50 px-6 py-4 rounded-2xl shadow-lg bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-200 text-pink-800 font-semibold text-base opacity-0 pointer-events-none transition-all duration-500 -translate-x-1/2">
+        <span id="toast-email-msg"></span>
+    </div>
+
     <!-- Scripts de VirtualSky -->
-    <script src="../stuquery.js"></script>
-    <script src="../virtualsky.js"></script>
-    <script src="../virtualsky-planets.js"></script>
+    <script src="./stuquery.js"></script>
+    <script src="./virtualsky.js"></script>
+    <script src="./virtualsky-planets.js"></script>
     <!-- EmailJS (browser SDK) -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
@@ -392,13 +411,17 @@
         let constOn = false; // Por defecto desactivado
         // Configuración del envío por correo (rellenar si se tiene backend disponible)
         // EmailJS config (rellenar con tus datos de EmailJS)
-        const EMAILJS_PUBLIC_KEY = '';
-        const EMAILJS_SERVICE_ID = '';
-        const EMAILJS_TEMPLATE_ID = '';
+        const EMAILJS_PUBLIC_KEY = 'enhZoBle3y8YrdMsa'; // Obtén esto en https://dashboard.emailjs.com/admin/account
+        const EMAILJS_SERVICE_ID = 'service_b1p0wyq'; // Ejemplo: 'service_xxxxx'
+        const EMAILJS_TEMPLATE_ID = 'template_b1qz1et'; // Ejemplo: 'template_xxxxx'
         // Opcional: endpoint serverless si prefieres enviar desde backend en vez de EmailJS
         const SEND_EMAIL_ENDPOINT = '';
         const COPYRIGHT_NAME = 'Joshua Colman Lombardo';
         const MUCI_EMAIL = 'contacto@muci.org';
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://zelfjyjvtoqfmaxmvetn.supabase.co';
+        const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplbGZqeWp2dG9xZm1heG12ZXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3ODMxNjEsImV4cCI6MjA3MDM1OTE2MX0.5K-ZnmkWVJ8rN7Gb232HQSa1reyUyINn5a4u8tTs6NI';
+        const SUPABASE_BUCKET = 'mapas-estelares'; // Cambia por tu bucket
         document.addEventListener('DOMContentLoaded',()=>{
             const yEl = document.getElementById('copyright-year');
             if(yEl) yEl.textContent = new Date().getFullYear();
@@ -514,14 +537,6 @@
             vs.setClock(new Date(specialDateInput.value));
             vs.draw();
 
-            // Controles
-            // document.getElementById('btn-now').addEventListener('click', () => {
-            //     const now = new Date();
-            //     vs.setClock(now);
-            //     setLocalDatetimeInput(now);
-            //     vs.draw();
-            // });
-
             document.getElementById('dt').addEventListener('change', (e) => {
                 const d = new Date(e.target.value);
                 vs.setClock(d);
@@ -564,152 +579,27 @@
                 }
             });
 
-            // Generador de póster (estilo lámina blanca con borde y Poppins)
-            document.getElementById('btn-poster').addEventListener('click', async () => {
-                const btn = document.getElementById('btn-poster');
-                const originalContent = btn.innerHTML;
-                
-                btn.innerHTML = '<div class="flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generando...</span></div>';
-                lucide.createIcons();
-                btn.disabled = true;
-
-                try {
-                    // Captura el canvas visible en el DOM
-                    const skyCanvas = document.querySelector('#starmap canvas');
-                    if (!skyCanvas) throw new Error('No se encontró el canvas del cielo');
-
-                    // A4 en píxeles
-                    const PW = 2480, PH = 3508;
-                    const poster = document.createElement('canvas');
-                    poster.width = PW;
-                    poster.height = PH;
-                    const ctx = poster.getContext('2d');
-
-                    // Fondo blanco y borde azul marino
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, PW, PH);
-                    const margin = 140;
-                    ctx.strokeStyle = '#0b1b3d';
-                    ctx.lineWidth = 6;
-                    ctx.strokeRect(margin, margin, PW - margin*2, PH - margin*2);
-
-                    // Círculo del cielo según referencia
-                    const circleR = 850;
-                    const circleX = PW/2;
-                    const circleY = 1180;
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-                    // Ajusta el tamaño del canvas fuente al círculo destino
-                    ctx.drawImage(
-                        skyCanvas,
-                        0, 0, skyCanvas.width, skyCanvas.height,
-                        circleX - circleR, circleY - circleR, circleR * 2, circleR * 2
-                    );
-                    ctx.restore();
-
-                    // Construir textos (Poppins) con tamaño más grande
-                    const msg = (document.getElementById('poster-msg')?.value || 'Nuestro primer beso bajo este mágico cielo nocturno').trim();
-                    const place = (document.getElementById('poster-place')?.value || 'Asunción').trim();
-                    const dtVal = (document.getElementById('dt')?.value || specialDateInput.value);
-                    const dt = new Date(dtVal);
-                    const dateStr = `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
-
-                    // Coordenadas desde VirtualSky (lat/long en DMS)
-                    const toDMS = (deg, isLat) => {
-                        const sign = deg >= 0 ? 1 : -1;
-                        const abs = Math.abs(deg);
-                        const D = Math.floor(abs);
-                        const Mfloat = (abs - D) * 60;
-                        const M = Math.floor(Mfloat);
-                        const S = Math.round((Mfloat - M) * 60);
-                        const hemi = isLat ? (sign >= 0 ? 'N' : 'S') : (sign >= 0 ? 'E' : 'W');
-                        return `${D}° ${String(M).padStart(2,'0')}' ${String(S).padStart(2,'0')}" ${hemi}`;
-                    };
-                    const latDeg = (vs?.latitude?.deg != null) ? vs.latitude.deg : 0;
-                    const lonDeg = (vs?.longitude?.deg != null) ? vs.longitude.deg : 0;
-                    const coords = `${toDMS(latDeg, true)}  ${toDMS(lonDeg, false)}`;
-
-                    ctx.fillStyle = '#0b1b3d';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'alphabetic';
-                    ctx.font = '600 80px Poppins';  // Mensaje principal (más grande)
-                    ctx.fillText(msg, PW/2, circleY + circleR + 200);
-
-                    ctx.font = '600 64px Poppins';  // Lugar (más grande)
-                    ctx.fillText(place, PW/2, circleY + circleR + 320);
-
-                    ctx.font = '500 54px Poppins';  // Coordenadas (más grande)
-                    ctx.fillText(coords, PW/2, circleY + circleR + 390);
-
-                    ctx.font = '500 54px Poppins';  // Fecha (más grande)
-                    ctx.fillText(dateStr, PW/2, circleY + circleR + 460);
-
-                    const dataUrl = poster.toDataURL('image/png', 1.0);
-                    const a = document.createElement('a');
-                    a.download = `mapa-estelar-${Date.now()}.png`;
-                    a.href = dataUrl;
-                    a.click();
-
-                    // Opcional: envío de imagen por correo
-                    const wantEmail = document.getElementById('email-enable')?.checked;
-                    const to = (document.getElementById('email-to')?.value || '').trim();
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (wantEmail && emailRegex.test(to)) {
-                        if (SEND_EMAIL_ENDPOINT) {
-                            try {
-                                await fetch(SEND_EMAIL_ENDPOINT, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        to,
-                                        subject: 'Tu mapa estelar — MuCi',
-                                        message: `${msg}\n\nGenerado por MuCi • Autor: ${COPYRIGHT_NAME}`,
-                                        filename: 'mapa-estelar.png',
-                                        imageBase64: dataUrl.split(',')[1]
-                                    })
-                                });
-                                alert('Imagen enviada al correo especificado.');
-                            } catch (err) {
-                                alert('No se pudo enviar por correo desde el navegador. Intenta nuevamente o descarga y envía manualmente.');
-                            }
-                        } else {
-                            const subject = encodeURIComponent('Tu mapa estelar — MuCi');
-                            const body = encodeURIComponent(`${msg}\n\nAdjunta la imagen descargada a este correo.\n\nMuCi • Autor: ${COPYRIGHT_NAME}\nContacto: ${MUCI_EMAIL}`);
-                            window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-                        }
-                    }
-                    // Guardar última imagen generada en memoria para el botón de envío manual
-                    window.__posterLastDataUrl = dataUrl;
-
-                } catch (e) {
-                    alert('Error generando el póster: ' + e.message);
-                } finally {
-                    // Limpiar offscreen si quedó en el DOM
-                    const off = document.getElementById('starmap_export');
-                    if (off) off.remove();
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
-                    lucide.createIcons();
-                }
-            });
-
             // Botón de envío por correo (no requiere descargar antes)
             const btnSend = document.getElementById('btn-send-email');
+            const btnSendText = document.getElementById('btn-send-email-text');
+            const btnSendSpinner = document.getElementById('btn-send-email-spinner');
             btnSend?.addEventListener('click', async () => {
                 const to = (document.getElementById('email-to')?.value || '').trim();
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(to)) return alert('Ingresa un correo válido');
-                // Generar offscreen para obtener imagen sin alterar la vista
+                if (!emailRegex.test(to)) {
+                    showToast('Ingresa un correo válido', false);
+                    return;
+                }
                 let dataUrl;
+                btnSend.disabled = true;
+                btnSendText.textContent = 'Enviando...';
+                btnSendSpinner.classList.remove('hidden');
                 try {
                     // Captura el canvas visible en el DOM
                     const skyCanvas = document.querySelector('#starmap canvas');
                     if (!skyCanvas) throw new Error('No se encontró el canvas del cielo');
 
-                    // Componer póster como en descarga
+                    // Componer póster igual que en descarga
                     const PW = 2480, PH = 3508;
                     const poster = document.createElement('canvas');
                     poster.width = PW; poster.height = PH;
@@ -729,47 +619,64 @@
                         circleX - circleR, circleY - circleR, circleR * 2, circleR * 2
                     );
                     ctx.restore();
+
+                    // Frase personalizada o por defecto
                     const msg = (document.getElementById('poster-msg')?.value || 'Nuestro primer beso bajo este mágico cielo nocturno').trim();
-                    const place = (document.getElementById('poster-place')?.value || 'Asunción').trim();
                     const dt = new Date(document.getElementById('dt')?.value || specialDateInput.value);
                     const dateStr = `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
-                    const toDMS = (deg, isLat)=>{const s=deg>=0?1:-1,a=Math.abs(deg),D=Math.floor(a),Mf=(a-D)*60,M=Math.floor(Mf),S=Math.round((Mf-M)*60),h=isLat?(s>=0?'N':'S'):(s>=0?'E':'W');return `${D}° ${String(M).padStart(2,'0')}' ${String(S).padStart(2,'0')}" ${h}`};
-                    const latDeg = (vs?.latitude?.deg != null) ? vs.latitude.deg : 0;
-                    const lonDeg = (vs?.longitude?.deg != null) ? vs.longitude.deg : 0;
-                    const coords = `${toDMS(latDeg, true)}  ${toDMS(lonDeg, false)}`;
+
                     ctx.fillStyle = '#0b1b3d';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'alphabetic';
-
-                    ctx.font = '600 80px Poppins';  // Mensaje principal (más grande)
+                    ctx.font = '600 80px Poppins';
                     ctx.fillText(msg, PW/2, circleY + circleR + 200);
 
-                    ctx.font = '600 64px Poppins';  // Lugar (más grande)
-                    ctx.fillText(place, PW/2, circleY + circleR + 320);
+                    ctx.font = '500 54px Poppins';
+                    ctx.fillText(dateStr, PW/2, circleY + circleR + 320);
 
-                    ctx.font = '500 54px Poppins';  // Coordenadas (más grande)
-                    ctx.fillText(coords, PW/2, circleY + circleR + 390);
-
-                    ctx.font = '500 54px Poppins';  // Fecha (más grande)
-                    ctx.fillText(dateStr, PW/2, circleY + circleR + 460);
+                    // No se agregan coordenadas ni lugar
 
                     // Para email, reduce tamaño y usa JPEG para menor peso
                     dataUrl = poster.toDataURL('image/jpeg', 0.92);
                     document.getElementById('starmap_export_mail')?.remove();
                 } catch(err){
-                    return alert('No se pudo generar la imagen para enviar.');
+                    showToast('No se pudo generar la imagen para enviar.', false);
+                    btnSend.disabled = false;
+                    btnSendText.textContent = 'Enviar por correo';
+                    btnSendSpinner.classList.add('hidden');
+                    return;
                 }
-                // Enviar con EmailJS si está configurado
+
+                // Subir imagen a Supabase
+                let publicUrl = '';
+                try {
+                    publicUrl = await window.uploadImageFromDataUrl(dataUrl);
+                } catch (err) {
+                    showToast('No se pudo subir la imagen a Supabase: ' + (err.message || err.error_description || err), false);
+                    btnSend.disabled = false;
+                    btnSendText.textContent = 'Enviar por correo';
+                    btnSendSpinner.classList.add('hidden');
+                    return;
+                }
+
+                // Enviar con EmailJS el enlace público
                 if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
                     try{
                         const params = {
-                            to_email: to,
+                            title: 'Tu mapa estelar — MuCi',
                             subject: 'Tu mapa estelar — MuCi',
-                            message: `Generado por MuCi • Autor: ${COPYRIGHT_NAME}`,
-                            image_base64: dataUrl
+                            message: `Generado por MuCi • Autor: ${COPYRIGHT_NAME}\n\nDescarga tu imagen aquí: ${publicUrl}`,
+                            to_email: to,
+                            image_url: publicUrl // Usa {{image_url}} en tu plantilla EmailJS
                         };
-                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
-                        alert('Correo enviado con EmailJS.');
+                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY);
+                        showToast('¡Correo enviado correctamente! 🎉', true);
+                        btnSendText.textContent = '¡Enviado!';
+                        setTimeout(() => {
+                            btnSendText.textContent = 'Enviar por correo';
+                        }, 2000);
+                        btnSendSpinner.classList.add('hidden');
+                        btnSend.disabled = false;
                         return;
                     }catch(e){
                         console.warn('EmailJS fallo, probando endpoint/mailing local', e);
@@ -788,16 +695,34 @@
                                 imageBase64: (dataUrl||'').split(',')[1]
                             })
                         });
-                        alert('Imagen enviada al correo especificado.');
+                        showToast('Imagen enviada al correo especificado.', true);
                     } catch (err) {
-                        alert('No se pudo enviar por correo desde el navegador.');
+                        showToast('No se pudo enviar por correo desde el navegador.', false);
                     }
                 } else {
-                    const subject = encodeURIComponent('Tu mapa estelar — MuCi');
-                    const body = encodeURIComponent(`Adjunta la imagen (descargada) a este correo.\n\nMuCi • Autor: ${COPYRIGHT_NAME}\nContacto: ${MUCI_EMAIL}`);
-                    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+                    showToast('No se pudo enviar el correo automáticamente. Verifica tu configuración de EmailJS.', false);
                 }
+                btnSend.disabled = false;
+                btnSendText.textContent = 'Enviar por correo';
+                btnSendSpinner.classList.add('hidden');
             });
+        }
+        
+        // Toast personalizado para alertas bonitas
+        function showToast(msg, success = true) {
+            const toast = document.getElementById('toast-email');
+            const toastMsg = document.getElementById('toast-email-msg');
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            toast.style.background = success
+                ? 'linear-gradient(to right, #fce7f3, #ede9fe)'
+                : 'linear-gradient(to right, #fee2e2, #f3e8ff)';
+            toast.style.color = success ? '#be185d' : '#991b1b';
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3500);
         }
     </script>
 </body>
