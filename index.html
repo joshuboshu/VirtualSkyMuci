@@ -330,7 +330,13 @@
             <!-- Mapa estelar circular más grande -->
             <main class="flex justify-center mb-12">
                 <div class="relative">
-                    <div id="starmap" class="circular-map w-[92vw] h-[92vw] max-w-[28rem] max-h-[28rem] md:w-[38rem] md:h-[38rem] md:max-w-[38rem] md:max-h-[38rem] lg:w-[48rem] lg:h-[48rem] lg:max-w-[48rem] lg:max-h-[48rem] xl:w-[56rem] xl:h-[56rem] xl:max-w-[56rem] xl:max-h-[56rem] bg-black" ondblclick="return false;"></div>
+                    <div id="starmap" class="circular-map w-[92vw] h-[92vw] max-w-[28rem] max-h-[28rem] md:w-[38rem] md:h-[38rem] md:max-w-[38rem] md:max-h-[38rem] lg:w-[48rem] lg:h-[48rem] lg:max-w-[48rem] lg:max-h-[48rem] xl:w-[56rem] xl:h-[56rem] xl:max-w-[56rem] xl:max-h-[56rem] bg-black select-none pointer-events-none" ondblclick="return false;" style="touch-action:none; user-select:none; position:relative;">
+                        <!-- El canvas de VirtualSky se inyecta aquí -->
+                    </div>
+                    <!-- Capa overlay para bloquear clics/taps en responsive y desktop -->
+                    <div id="starmap-blocker"
+                        class="absolute inset-0 z-20"
+                        style="pointer-events:all; background:transparent; touch-action:none; user-select:none;"></div>
                 </div>
             </main>
 
@@ -723,6 +729,17 @@
                 toast.classList.remove('opacity-100');
                 toast.classList.add('opacity-0', 'pointer-events-none');
             }, 3500);
+        }
+
+        // Bloquea todos los eventos sobre el starmap (canvas y alrededores)
+        // Esto evita redirecciones y cualquier interacción accidental
+        const starmapBlocker = document.getElementById('starmap-blocker');
+        if (starmapBlocker) {
+            starmapBlocker.addEventListener('click', e => e.stopPropagation());
+            starmapBlocker.addEventListener('mousedown', e => e.preventDefault());
+            starmapBlocker.addEventListener('touchstart', e => e.preventDefault());
+            starmapBlocker.addEventListener('pointerdown', e => e.preventDefault());
+            starmapBlocker.addEventListener('contextmenu', e => e.preventDefault());
         }
     </script>
 </body>
