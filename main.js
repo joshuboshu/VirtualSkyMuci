@@ -7,10 +7,13 @@ let constOn = false; // Por defecto desactivado
 
 const COPYRIGHT_NAME = "Joshua Colman Lombardo";
 // Configuración del envío por correo (rellenar si se tiene backend disponible)
-// EmailJS config
-const EMAILJS_PUBLIC_KEY = 'enhZoBle3y8YrdMsa';
-const EMAILJS_SERVICE_ID = 'service_b1p0wyq';
-const EMAILJS_TEMPLATE_ID = 'template_b1qz1et';
+// EmailJS config (NO SE USA)
+// const EMAILJS_PUBLIC_KEY = 'enhZoBle3y8YrdMsa';
+// const EMAILJS_SERVICE_ID = 'service_b1p0wyq';
+// const EMAILJS_TEMPLATE_ID = 'template_b1qz1et';
+
+
+
 const SEND_EMAIL_ENDPOINT = '';
 
 document.addEventListener("DOMContentLoaded", () => {
