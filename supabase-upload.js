@@ -1,9 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://zelfjyjvtoqfmaxmvetn.supabase.co';
+const SUPABASE_URL = 'https://ytqavvyhohtahbhzimwz.supabase.co';
 
 // Aquí pon tu Service Role Key (la que obtienes en Settings > API > Service Role Key)
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplbGZqeWp2dG9xZm1heG12ZXRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDc4MzE2MSwiZXhwIjoyMDcwMzU5MTYxfQ.zsRfBFK3Q5bZ03iMEaHi5qy0TUOW0DvNk-8asJX48m8';
+const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0cWF2dnlob2h0YWhiaHppbXd6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDkzMDE0MCwiZXhwIjoyMDcwNTA2MTQwfQ.l6ByKHlVI4GuWIBalojBeGCvi2HtmAHclwNevC1ycGI';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
