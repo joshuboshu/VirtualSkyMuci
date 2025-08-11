@@ -5,14 +5,7 @@ let vs;
 let namesOn = false; // Por defecto desactivado
 let constOn = false; // Por defecto desactivado
 
-const COPYRIGHT_NAME = "Joshua Colman Lombardo";
-// Configuración del envío por correo (rellenar si se tiene backend disponible)
-// EmailJS config (NO SE USA)
-// const EMAILJS_PUBLIC_KEY = 'enhZoBle3y8YrdMsa';
-// const EMAILJS_SERVICE_ID = 'service_b1p0wyq';
-// const EMAILJS_TEMPLATE_ID = 'template_b1qz1et';
-
-
+// Configuración del envío por correo
 
 const SEND_EMAIL_ENDPOINT = '';
 
@@ -275,7 +268,7 @@ function initializeVirtualSky() {
       return;
     }
 
-    // Reemplaza TODO el bloque de EmailJS por esto:
+    // Enviar por correo (APUNTA AL BACKEND):
     try {
     // 1. Configuración de la petición
     const SEND_EMAIL_ENDPOINT = 'https://send-email-theta-three.vercel.app/api/sendEmail';
