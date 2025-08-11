@@ -1,6 +1,5 @@
 import { SEND_EMAIL_ENDPOINT } from './config.js'; // o accede a window.env
 
-
 // Inicializar iconos
 lucide.createIcons();
 
@@ -9,8 +8,6 @@ let namesOn = false; // Por defecto desactivado
 let constOn = false; // Por defecto desactivado
 
 // Configuración del envío por correo
-
-const SEND_EMAIL_ENDPOINT = '';
 
 document.addEventListener("DOMContentLoaded", () => {
   const yEl = document.getElementById("copyright-year");
@@ -274,7 +271,6 @@ function initializeVirtualSky() {
     // Enviar por correo (APUNTA AL BACKEND):
     try {
     // 1. Configuración de la petición
-    const SEND_EMAIL_ENDPOINT = SEND_EMAIL_ENDPOINT;
     const imagePath = publicUrl;
     const response = await fetch(SEND_EMAIL_ENDPOINT, {
         method: 'POST',
