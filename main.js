@@ -268,7 +268,7 @@ function initializeVirtualSky() {
     // Reemplaza TODO el bloque de EmailJS por esto:
     try {
     // 1. Configuración de la petición
-    const SEND_EMAIL_ENDPOINT = 'https://cielo-backend.muci.org/api/sendEmail';
+    const SEND_EMAIL_ENDPOINT = 'https://send-email-theta-three.vercel.app/api/sendEmail';
     const imagePath = publicUrl;
     const response = await fetch(SEND_EMAIL_ENDPOINT, {
         method: 'POST',
