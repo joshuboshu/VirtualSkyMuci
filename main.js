@@ -1,4 +1,4 @@
-import { SEND_EMAIL_ENDPOINT } from './config.js'; // o accede a window.env
+import { SEND_EMAIL_ENDPOINT } from './config.js';
 
 // Inicializar iconos
 lucide.createIcons();
