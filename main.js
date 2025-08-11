@@ -1,5 +1,3 @@
-import { SEND_EMAIL_ENDPOINT } from './config.js';
-
 // Inicializar iconos
 lucide.createIcons();
 
