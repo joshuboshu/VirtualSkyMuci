@@ -1,5 +1,3 @@
-import { SEND_EMAIL_ENDPOINT } from './config.js'; // o accede a window.env
-
 // Inicializar iconos
 lucide.createIcons();
 
@@ -7,7 +5,6 @@ let vs;
 let namesOn = false; // Por defecto desactivado
 let constOn = false; // Por defecto desactivado
 
-// Configuración del envío por correo
 
 document.addEventListener("DOMContentLoaded", () => {
   const yEl = document.getElementById("copyright-year");
@@ -268,9 +265,10 @@ function initializeVirtualSky() {
       return;
     }
 
-    // Enviar por correo (APUNTA AL BACKEND):
+    // Reemplaza TODO el bloque de EmailJS por esto:
     try {
     // 1. Configuración de la petición
+    const SEND_EMAIL_ENDPOINT = 'https://cielo-backend.muci.org/api/sendEmail';
     const imagePath = publicUrl;
     const response = await fetch(SEND_EMAIL_ENDPOINT, {
         method: 'POST',
@@ -360,16 +358,4 @@ if (starmapBlocker) {
   starmapBlocker.addEventListener("touchstart", (e) => e.preventDefault());
   starmapBlocker.addEventListener("pointerdown", (e) => e.preventDefault());
   starmapBlocker.addEventListener("contextmenu", (e) => e.preventDefault());
-}
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => {
-        console.log('Service Worker registrado con éxito:', registration.scope);
-      })
-      .catch(error => {
-        console.error('Error registrando el Service Worker:', error);
-      });
-  });
 }

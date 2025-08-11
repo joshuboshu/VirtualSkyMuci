@@ -1,7 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from './config.js'; // o accede a window.env
+const SUPABASE_URL = 'https://zelfjyjvtoqfmaxmvetn.supabase.co';
 
+// Aquí pon tu Service Role Key (la que obtienes en Settings > API > Service Role Key)
+const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplbGZqeWp2dG9xZm1heG12ZXRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDc4MzE2MSwiZXhwIjoyMDcwMzU5MTYxfQ.zsRfBFK3Q5bZ03iMEaHi5qy0TUOW0DvNk-8asJX48m8';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
