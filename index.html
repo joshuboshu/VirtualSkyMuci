@@ -10,11 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- Importa el módulo del SDK de Supabase para subida -->
-    <script type="module">
-        import { uploadImageFromDataUrl } from './supabase-upload.js';
-        window.uploadImageFromDataUrl = uploadImageFromDataUrl;
-    </script>
 </head>
 <body>
     <!-- Pantalla de Bienvenida -->
@@ -204,9 +199,6 @@
     <script src="./stuquery.js"></script>
     <script src="./virtualsky.js"></script>
     <script src="./virtualsky-planets.js"></script>
-    <!-- EmailJS (browser SDK) -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <script src="./main.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>

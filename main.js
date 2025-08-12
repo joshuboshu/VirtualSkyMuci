@@ -1,9 +1,13 @@
+import { uploadImageFromDataUrl } from './supabase-upload.js';
+
 // Inicializar iconos
 lucide.createIcons();
 
 let vs;
-let namesOn = false; // Por defecto desactivado
-let constOn = false; // Por defecto desactivado
+let namesOn = false;
+let constOn = false;
+
+const SEND_EMAIL_ENDPOINT = import.meta.env.VITE_SEND_EMAIL_ENDPOINT;
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -268,7 +272,6 @@ function initializeVirtualSky() {
     // Reemplaza TODO el bloque de EmailJS por esto:
     try {
     // 1. Configuración de la petición
-    const SEND_EMAIL_ENDPOINT = 'https://send-email-theta-three.vercel.app/api/sendEmail';
     const imagePath = publicUrl;
     const response = await fetch(SEND_EMAIL_ENDPOINT, {
         method: 'POST',

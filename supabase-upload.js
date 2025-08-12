@@ -1,9 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://ytqavvyhohtahbhzimwz.supabase.co';
-
-// Aquí pon tu Service Role Key (la que obtienes en Settings > API > Service Role Key)
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0cWF2dnlob2h0YWhiaHppbXd6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDkzMDE0MCwiZXhwIjoyMDcwNTA2MTQwfQ.l6ByKHlVI4GuWIBalojBeGCvi2HtmAHclwNevC1ycGI';
+// Usa variables de entorno de Vite
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -22,7 +21,7 @@ export async function uploadImageFromDataUrl(dataUrl) {
   const filename = `mapas/mapa-estelar-${Date.now()}.jpg`;
 
   const { error: uploadError } = await supabase.storage
-    .from('mapas-estelares')
+    .from(import.meta.env.VITE_SUPABASE_BUCKET)
     .upload(filename, blob, { upsert: true });
 
   if (uploadError) {
@@ -30,7 +29,7 @@ export async function uploadImageFromDataUrl(dataUrl) {
   }
 
   const { data: urlData, error: urlError } = supabase.storage
-    .from('mapas-estelares')
+    .from(import.meta.env.VITE_SUPABASE_BUCKET)
     .getPublicUrl(filename);
 
   if (urlError) {
