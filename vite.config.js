@@ -7,6 +7,13 @@ export default defineConfig({
     open: true
   },
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    emptyOutDir: true,
+    // Asegurar que los archivos de VirtualSky se copien correctamente
+    rollupOptions: {
+      input: {
+        main: './index.html'
+      }
+    }
   }
 });
