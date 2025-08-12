@@ -256,7 +256,7 @@ function initializeVirtualSky() {
     // Subir imagen a Supabase
     let publicUrl = "";
     try {
-      publicUrl = await window.uploadImageFromDataUrl(dataUrl);
+      publicUrl = await uploadImageFromDataUrl(dataUrl);
     } catch (err) {
       showToast(
         "No se pudo subir la imagen a Supabase: " +
